@@ -12,7 +12,7 @@ USER ${USER_UID}
 # 从certs阶段拷贝CA证书
 COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 # 从buil阶段拷贝二进制文件
-COPY --from=build ../bin/otelcontribcol .
+COPY --from=build ../bin/otelcontribcol_linux_amd64 ./otelcontribcol
 
 ENTRYPOINT["./otelcontribcol"]
 
