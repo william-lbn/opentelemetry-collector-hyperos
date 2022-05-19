@@ -1,0 +1,39 @@
+receivers:
+#  hostmetrics:
+#    collection_interval: 1s
+#    scrapers:
+#      cpu:
+#        metrics:
+#          system.cpu.utilization:
+#            enabled: true
+#      memory:
+#        metrics:
+#          system.memory.utilization:
+#            enabled: true
+  prometheus_simple:
+    collection_interval: 60s
+    endpoint: 192.168.1.20:32679
+    metrics_path: /federate
+    params:
+      match[]:
+        - '{job="kubelet"}'
+#        - '{__name__= "container_spec_cpu_quota"}'
+processors:
+  hypermonitor_relationmetricprocessor:
+    rules:
+      - unify_metrics:
+          - container_spec_cpu_quota
+          - container_spec_memory_limit_bytes
+        description: unify under the deployment
+
+exporters:
+  prometheusremotewrite:
+    endpoint: "http://192.168.1.20:32679/api/v1/write"
+    external_labels:
+service:
+  extensions: []
+  pipelines:
+    metrics:
+      receivers: [prometheus_simple]
+      processors: [hypermonitor_relationmetricprocessor]
+      exporters: [prometheusremotewrite]
