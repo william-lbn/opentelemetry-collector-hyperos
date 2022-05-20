@@ -43,7 +43,8 @@ func addAttributes(metric pmetric.Metric) {
 			if value, ok := DeploymentMap[podName.StringVal()]; ok {
 				//加日志
 
-				metric.Gauge().DataPoints().At(i).Attributes().InsertString("deployment", value)
+				metric.Gauge().DataPoints().At(i).Attributes().InsertString("component_name", value)
+				metric.Gauge().DataPoints().At(i).Attributes().InsertString("component_id", DeploymentUidMap[value])
 			}
 		}
 	}

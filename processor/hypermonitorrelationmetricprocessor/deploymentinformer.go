@@ -16,10 +16,12 @@ import (
 
 var logger *zap.Logger
 var DeploymentMap map[string]string
+var DeploymentUidMap map[string]string
 
 func intLogger() {
 	logger, _ = zap.NewProduction()
 	DeploymentMap = make(map[string]string)
+	DeploymentUidMap = make(map[string]string)
 }
 
 func KubernetesStart() {
@@ -61,7 +63,7 @@ func KubernetesStart() {
 func syncDeploymentPodName(obj interface{}, clientset *kubernetes.Clientset, deploymentMap map[string]string) {
 	mObj := obj.(*appsv1.Deployment)
 	logger.Info("get the deployment name", zap.String("name:", mObj.GetName()))
-
+	DeploymentUidMap[mObj.GetName()] = string(mObj.UID)
 	pods, err := clientset.CoreV1().Pods(mObj.GetNamespace()).List(context.TODO(), v1.ListOptions{LabelSelector: convertMapToSelector(mObj.Spec.Selector.MatchLabels)})
 	if err != nil {
 		return
