@@ -23,8 +23,9 @@ spec:
       containers:
         - command:
             - "/otelcontribcol"
-            - "--config=/etc/otel/config.yaml"
-          image: williamluckyli/otel-collector-hyperos-relation-metrics:v1.0
+            - "--config=/conf/otel/otel-collector-config.yaml"
+          image: williamluckyli/otel-collector-hyperos-relation-metrics:v1.3
+          imagePullPolicy: IfNotPresent
           name: paladin
           resources:
             limits:
@@ -47,6 +48,8 @@ spec:
         - configMap:
             name: otel-collector-conf
             items:
-              - key: config
-                path: config.yaml
+              - key: otel-collector-config
+                path: otel-collector-config.yaml
+              - key: kubeconfig
+                path: config
           name: otel-collector-config-vol
