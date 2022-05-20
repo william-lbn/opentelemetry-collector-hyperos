@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: paladin
+  namespace: hypermonitor
+  labels:
+    app: opentelemetry
+    component: otel-collector
+spec:
+  selector:
+    matchLabels:
+      app: opentelemetry
+      component: otel-collector
+  minReadySeconds: 5
+  progressDeadlineSeconds: 120
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: opentelemetry
+        component: otel-collector
+    spec:
+      containers:
+        - command:
+            - "/otelcontribcol"
+            - "--config=/etc/otel/config.yaml"
+          image: williamluckyli/otel-collector-hyperos-relation-metrics:v1.0
+          name: paladin
+          resources:
+            limits:
+              cpu: 1
+              memory: 2Gi
+            requests:
+              cpu: 200m
+              memory: 400Mi
+          ports:
+            - containerPort: 55679 # Default endpoint for ZPages.
+            - containerPort: 4317 # Default endpoint for OpenTelemetry receiver.
+            - containerPort: 14250 # Default endpoint for Jaeger HTTP receiver.
+            - containerPort: 14268 # Default endpoint for Jaeger HTTP receiver.
+            - containerPort: 9411 # Default endpoint for Zipkin receiver.
+            - containerPort: 8899  # Default endpoint for querying metrics.
+          volumeMounts:
+            - name: otel-collector-config-vol
+              mountPath: /conf/otel
+      volumes:
+        - configMap:
+            name: otel-collector-conf
+            items:
+              - key: config
+                path: config.yaml
+          name: otel-collector-config-vol
