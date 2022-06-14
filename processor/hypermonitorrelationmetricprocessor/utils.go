@@ -15,6 +15,7 @@
 package hypermonitorrelationmetricprocessor // import "github.com/open-telemetry/opentelemetry-collector-contrib/processor/metricsgenerationprocessor"
 
 import (
+	"fmt"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 )
 
@@ -38,15 +39,32 @@ func addAttributes(metric pmetric.Metric) {
 	if metric.DataType() == pmetric.MetricDataTypeGauge {
 		dataPoints := metric.Gauge().DataPoints()
 		for i := 0; i < dataPoints.Len(); i++ {
-			podName, _ := dataPoints.At(i).Attributes().Get("pod")
-			//fmt.Print("pod name: ", podName) 加日志
-			if value, ok := DeploymentMap[podName.StringVal()]; ok {
-				//加日志
-
-				metric.Gauge().DataPoints().At(i).Attributes().InsertString("component_name", value)
-				metric.Gauge().DataPoints().At(i).Attributes().InsertString("component_id", DeploymentUidMap[value])
+			//judge： component_name key exist
+			_, ok := dataPoints.At(i).Attributes().Get("component_name")
+			if !ok {
+				podName, ok := dataPoints.At(i).Attributes().Get("pod")
+				if ok {
+					value, ok := DeploymentMap[podName.StringVal()]
+					if ok {
+						fmt.Println("cpu and mem of pod add info of deployment %s", value)
+						metric.Gauge().DataPoints().At(i).Attributes().InsertString("component_name", value)
+						metric.Gauge().DataPoints().At(i).Attributes().InsertString("component_id", DeploymentUidMap[value])
+					}
+				}
+				//update qps record: add component_name and component_id by podname
+				qpsPodName, ok := dataPoints.At(i).Attributes().Get("podname")
+				if ok {
+					value, ok := DeploymentMap[qpsPodName.StringVal()]
+					if ok {
+						//加日志
+						fmt.Println("qps pod add info of deployment %s", value)
+						metric.Gauge().DataPoints().At(i).Attributes().InsertString("component_name", value)
+						metric.Gauge().DataPoints().At(i).Attributes().InsertString("component_id", DeploymentUidMap[value])
+					}
+				}
 			}
 		}
+
 	}
 
 }
