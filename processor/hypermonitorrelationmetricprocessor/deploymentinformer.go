@@ -27,8 +27,8 @@ func intLogger() {
 func KubernetesStart() {
 	intLogger()
 
-	//config, err := clientcmd.BuildConfigFromFlags("", "/Users/williamlee/Desktop/code/pml/Informers-example/admin.conf")
-	config, err := clientcmd.BuildConfigFromFlags("", "/conf/otel/config")
+	config, err := clientcmd.BuildConfigFromFlags("", "/Users/lumingming/.kube/gaia-field1-1")
+	//config, err := clientcmd.BuildConfigFromFlags("", "/conf/otel/config")
 	if err != nil {
 		panic(err)
 	}

@@ -1,37 +1,29 @@
 receivers:
   prometheus_simple:
-    collection_interval: 10s
-    endpoint: 192.168.1.51:31445
+    collection_interval: 60s
+    endpoint: 192.168.1.20:32679
     metrics_path: /federate
     params:
       match[]:
         - '{job="kubelet"}'
-        - '{reporter_name="mlet1"}'
 #        - '{__name__= "container_spec_cpu_quota"}'
 processors:
   hypermonitor_relationmetricprocessor:
     rules:
       - unify_metrics:
           - container_spec_cpu_quota
-          - container_cpu_usage_seconds_total
-          - container_memory_rss
           - container_spec_memory_limit_bytes
           - io_sid_traffics
         description: unify under the deployment
-  attributes:
-    actions:
-      - key: exported_job
-        action: delete
-      - key: exported_instance
-        action: delete
+
 exporters:
   prometheusremotewrite:
-    endpoint: "http://192.168.1.51:31445/api/v1/write"
+    endpoint: "http://192.168.1.20:32679/api/v1/write"
     external_labels:
 service:
   extensions: []
   pipelines:
     metrics:
       receivers: [prometheus_simple]
-      processors: [hypermonitor_relationmetricprocessor,attributes]
+      processors: [hypermonitor_relationmetricprocessor]
       exporters: [prometheusremotewrite]
